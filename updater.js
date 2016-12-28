@@ -72,19 +72,48 @@ function getCSVDetails(dirAddr) {
 }
 
 
+// function populateDb(filePath) {
+//   var csvDetails = getCSVDetails(filePath)
+//   db.init(function(err) {
+//     // initialized the DB
+//     const dbConn =  db.client
+//     for (let csvDetail of csvDetails) {
+//       console.log(csvDetail.name)
+//       var options = {
+//         db: dbConn,
+//         collectionName: csvDetail.name
+//       }
+//       console.log(options.collectionName)
+//       csvtojson(csvDetail.path, function(data) {
+//         console.log(data)
+//         dbInsert(data, options, function(err) {
+//           if(err) {
+//             console.log(err)
+//           }
+//
+//         })
+//       })
+//     }
+//     if(err)
+//       console.log(err)
+//   })
+// }
+
+
 function populateDb(filePath) {
   var csvDetails = getCSVDetails(filePath)
   db.init(function(err) {
     // initialized the DB
     const dbConn =  db.client
-    for (let csvDetail of csvDetails) {
+    async.each(csvDetails, function(csvDetail, callback) {
       console.log(csvDetail.name)
       var options = {
         db: dbConn,
         collectionName: csvDetail.name
       }
-      console.log(options)
+      console.log(options.collectionName)
       csvtojson(csvDetail.path, function(data) {
+        console.log(data)
         dbInsert(data, options, function(err) {
           if(err) {
             console.log(err)
@@ -92,11 +121,16 @@ function populateDb(filePath) {
 
         })
       })
-    }
+     function(err) {
     if(err)
       console.log(err)
+      else {
+        console.log("done")
+      }
+    }
   })
-}
+})
+
 
 
 
