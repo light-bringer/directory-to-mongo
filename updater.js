@@ -57,6 +57,7 @@ function dbInsert(object, options) {
 
     db.collection(collectionName).insert(object,function(err,doc){
       console.log("inserted == " + collectionName)
+      return true
     })
 }
 
@@ -100,38 +101,40 @@ function getCSVDetails(dirAddr) {
 // }
 
 
+
 function populateDb(filePath) {
   var csvDetails = getCSVDetails(filePath)
   db.init(function(err) {
-    // initialized the DB
     const dbConn =  db.client
-    async.each(csvDetails, function(csvDetail, callback) {
-      console.log(csvDetail.name)
+    async.each(csvDetails, function(csvDetail, cb) {
       var options = {
         db: dbConn,
         collectionName: csvDetail.name
       }
       console.log(options.collectionName)
       csvtojson(csvDetail.path, function(data) {
-        console.log(data)
-        dbInsert(data, options, function(err) {
-          if(err) {
-            console.log(err)
-          }
-
+        //console.log(data)
+        dbInsert(data, options, function() {
+          if(err)
+          console.log(err)
         })
       })
-     function(err) {
+
+      cb
+    })
     if(err)
-      console.log(err)
-      else {
-        console.log("done")
-      }
-    }
+    console.log(err)
   })
+
+}
+process.argv.forEach(function (val, index, array) {
+  console.log(index + ': ' + val)
 })
-
-
-
-
-populateDb("/home/lightbringer/Desktop/incture/recruitment/NaukriData")
+if(process.argv[2]===undefined) {
+  console.log("no CSV File path given")
+  return
+}
+else {
+  var pathtoCSV  = process.argv[2]
+  populateDb(pathtoCSV)
+}
